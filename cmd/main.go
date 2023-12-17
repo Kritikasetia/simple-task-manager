@@ -14,7 +14,7 @@ func main() {
 	handler.InitHandler(db.GetDB())
 
 	http.HandleFunc("/tasks/create", handler.CreateTaskHandler)
-
+	http.HandleFunc("/tasks/read", handler.ReadTaskHandler)
 	port := 8080
 	serverAddr := fmt.Sprintf(":%d", port)
 

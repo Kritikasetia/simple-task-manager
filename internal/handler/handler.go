@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"simpletaskmanager/internal/app"
+	"strconv"
 )
 
 var db *sql.DB
@@ -38,4 +39,33 @@ func CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "Task created with ID: %d", id)
+}
+
+func ReadTaskHandler(w http.ResponseWriter, r *http.Request) {
+	taskIDStr := r.URL.Query().Get("id")
+	if taskIDStr == "" {
+		http.Error(w, "Task ID is required", http.StatusBadRequest)
+		return
+	}
+
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		http.Error(w, "Invalid Task ID", http.StatusBadRequest)
+		return
+	}
+
+	task, err := app.ReadTask(context.Background(), db, taskID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error reading task: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse, err := json.Marshal(task)
+	if err != nil {
+		http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
 }

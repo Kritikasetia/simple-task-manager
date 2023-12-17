@@ -24,3 +24,13 @@ func CreateTask(ctx context.Context, db *sql.DB, task Task) (int, error) {
 
 	return int(id), nil
 }
+
+func ReadTask(ctx context.Context, db *sql.DB, taskID int) (Task, error) {
+	var task Task
+	err := db.QueryRowContext(ctx, "SELECT id, title, description FROM tasks WHERE id = ?", taskID).
+		Scan(&task.ID, &task.Title, &task.Description)
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
+}
